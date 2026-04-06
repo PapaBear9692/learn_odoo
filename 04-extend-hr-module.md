@@ -1,4 +1,4 @@
-# Modifying the HR Module
+# Modifying the HR Module (Example)
 
 > **Golden Rule**: Never edit core Odoo source files. Always create a **new module** that inherits the existing one.
 

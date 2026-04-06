@@ -16,7 +16,11 @@ source .odoo/bin/activate
 ```
 
 ## 3. Install Python Dependencies
-
+1. open requirements.txt
+2. find ```lxml==5.2.1```
+3. change ```lxml==5.3.0```
+4. save
+5. execute :
 ```bash
 pip install -r requirements.txt
 ```
@@ -51,7 +55,7 @@ Create `odoo.conf` in the project root:
 ```ini
 [options]
 # Paths to addon directories (comma-separated)
-addons_path = /home/nishat/Work/odoo-19-fresh/odoo/addons,/home/nishat/Work/odoo-19-fresh/addons,/home/nishat/Work/odoo-19-fresh/custom_addons
+addons_path = /home/username/Work/odoo-19/odoo/addons,/home/nishat/Work/odoo-19/addons,/home/username/Work/odoo-19/custom_addons
 
 # Database settings
 db_host = localhost
@@ -100,18 +104,21 @@ Access at: `http://localhost:8069`
 
 Before installing custom modules:
 
+0. Go to **Settings**, scroll down, **activate developer mode**
 1. Go to **Apps** menu
-2. Click **Update Apps List** (top left)
+2. Click **Update Apps List** (top left, 2nd option)
 3. Click **Update**
 
 ## Common Commands
 
 ```bash
 # Start Odoo normally
-python odoo-bin -c odoo.conf
+python odoo-bin -c odoo.conf  
+
+./odoo-bin -c odoo.conf
 
 # Start with specific database
-python odoo-bin -c odoo.conf -d my_odoo_db
+python odoo-bin -c odoo.conf -d my_odoo_db_name
 
 # Start with debug logging
 python odoo-bin -c odoo.conf --log-level=debug
@@ -141,4 +148,5 @@ sudo -u postgres psql -c "CREATE USER odoo WITH PASSWORD 'odoo' CREATEDB SUPERUS
 ### Module Not Found in Apps
 1. Verify `custom_addons` path is correct in `odoo.conf`
 2. Restart Odoo
-3. Go to **Apps** → **Update Apps List**
+3. Go to **Settings**, scroll down, **activate developer mode**
+4. Go to **Apps** → **Update Apps List**

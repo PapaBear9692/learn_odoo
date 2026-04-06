@@ -22,42 +22,46 @@ touch custom_addons/book_management/views/book_views.xml
 touch custom_addons/book_management/security/ir.model.access.csv
 ```
 
-## 2. Complete Directory Structure
+## Complete Directory Structure
 
 ```
 custom_addons/book_management/
 ├── __init__.py              # Package init - imports submodules
 ├── __manifest__.py          # Module metadata and configuration
+|
 ├── models/
 │   ├── __init__.py          # Imports all model files
 │   └── book.py              # Book and Category model definitions
+|
 ├── views/
 │   └── book_views.xml       # UI definitions (forms, lists, menus)
+|
 ├── controllers/
 │   ├── __init__.py          # Imports controllers
 │   └── controllers.py       # HTTP endpoints (optional)
+|
 ├── security/
 │   └── ir.model.access.csv  # Access rights for models
 └── demo/
     └── demo.xml             # Sample data (optional)
 ```
 
-## 3. File Explanations
+## File Explanations
 
 | File | Contains | Purpose |
 |------|----------|---------|
-| `__init__.py` | `from . import models` | Makes directory a Python package |
+| `__init__.py` | `from . import models` | Makes the directory a Python package |
 | `__manifest__.py` | Dict with metadata | Tells Odoo about the module |
 | `models/__init__.py` | `from . import book` | Imports model files |
 | `models/book.py` | Python classes | Defines database tables and business logic |
 | `views/book_views.xml` | XML records | Defines UI (forms, lists, kanban, menus) |
 | `security/ir.model.access.csv` | CSV rows | Defines who can access the models |
-| `controllers/controllers.py` | Python classes | HTTP endpoints for web API |
+| `controllers/controllers.py` | Python classes | HTTP endpoints for web and API |
 | `demo/demo.xml` | XML records | Sample data for testing |
 
 ---
 
-## 4. Create __init__.py
+## 2. Create __init__.py
 
 `custom_addons/book_management/__init__.py`
 ```python
@@ -67,7 +71,7 @@ from . import controllers
 
 ---
 
-## 5. Create __manifest__.py
+## 3. Create __manifest__.py
 
 `custom_addons/book_management/__manifest__.py`
 ```python
@@ -92,7 +96,7 @@ from . import controllers
     # Data files loaded in order
     'data': [
         'security/ir.model.access.csv',
-        'views/book_views.xml',
+        'views/book_views.xml', # the view that we will create
     ],
 
     # Demo data (loaded only with --demo flag)
@@ -126,7 +130,7 @@ from . import controllers
 
 ---
 
-## 6. Create Models
+## 4. Create Models
 
 ### models/__init__.py
 ```python
@@ -140,7 +144,7 @@ from odoo.exceptions import ValidationError
 
 class BookCategory(models.Model):
     """Category for organizing books"""
-    _name = 'book.category'
+    _name = 'book.category' # Notice we added name and did not add _inherit
     _description = 'Book Category'
     _order = 'name'
 
@@ -171,7 +175,8 @@ class BookCategory(models.Model):
         for category in self:
             category.book_count = len(category.book_ids)
 
-
+# We could create seperate files for the classed, 
+# but would have to add the names in ```models/__init__.py```
 class BookManagement(models.Model):
     """Main book model"""
     _name = 'book.management'
@@ -387,7 +392,7 @@ class BookManagement(models.Model):
 
 ---
 
-## 7. Create Views
+## 5. Create Views
 
 ### views/book_views.xml
 ```xml
@@ -615,7 +620,7 @@ class BookManagement(models.Model):
         </field>
     </record>
 
-    <!-- ==================== MENU ITEMS ==================== -->
+    <!-- ======= MENU ITEMS (The Top Menu ) ====== -->
 
     <!-- Root Menu -->
     <menuitem id="book_management_menu_root"
@@ -669,7 +674,7 @@ class BookManagement(models.Model):
 
 ---
 
-## 8. Create Security
+## 6. Create Security (Check 06-security-rules.md for details)
 
 ### security/ir.model.access.csv
 ```csv
@@ -704,7 +709,7 @@ access_book_category_manager,book.category.manager,model_book_category,base.grou
 
 ---
 
-## 9. Create Demo Data (Optional)
+## 7. Create Demo Data (Optional)
 
 ### demo/demo.xml
 ```xml
@@ -746,36 +751,33 @@ access_book_category_manager,book.category.manager,model_book_category,base.grou
 
 ---
 
-## 10. Install the Module
+## 8. Install the Module
 
-### Method 1: Command Line
-```bash
-python odoo-bin -c odoo.conf -d my_odoo_db -i book_management --stop-after-init
-```
-
-### Method 2: Web UI
+### Method 1: Web UI
+0. Turn on Developer Mode in settings (in Odoo web ui)
 1. Start Odoo: `python odoo-bin -c odoo.conf`
 2. Go to **Apps** → **Update Apps List**
 3. Search for "Book Management"
 4. Click **Install**
 
-### Method 3: Direct URL
-```
-http://localhost:8069/web#model=ir.module.module&view_type=list&domain=[('name','ilike','book_management')]
+### Method 2: Command Line
+```bash
+python odoo-bin -c odoo.conf -d my_odoo_db_name -i book_management --stop-after-init
 ```
 
 ---
 
-## 11. Update Module After Changes
+## 9. Update Module After Changes
 
-When you modify the module files:
+When you modify the module files: In Web UI: **Apps** → Search module → Click **Upgrade**
 
+Or 
 ```bash
 # Restart Odoo and update the module
-python odoo-bin -c odoo.conf -d my_odoo_db -u book_management
+python odoo-bin -c odoo.conf -d my_odoo_db_name -u book_management
 ```
 
-Or in UI: **Apps** → Search module → Click **Upgrade**
+
 
 ---
 

@@ -1,66 +1,74 @@
 # Extend Existing Module
 
-This guide shows how to extend the **Sale Order** module by adding a custom field.
+This guide shows how to extend the **Sale Order** (included in base odoo) module by adding a custom field.
 
-## Example: Add "Custom Note" field to Sale Order
+## Example: Add "Custom Note" and "Delivery Preference" field to Sale Order
 
 ## 1. Scaffold Extension Module
 
 ```bash
 python odoo-bin scaffold sale_order_ext custom_addons
 ```
+here ```sale_order_ext``` is the name of the module we are creating, 
+
+```custom_addons``` is the name of folder we are creating the model at.
 
 This creates:
 ```
 custom_addons/sale_order_ext/
+|
 ├── __init__.py
 ├── __manifest__.py
+|
 ├── models/
 │   ├── __init__.py
 │   └── sale_order_ext.py
+|
 ├── views/
 │   └── sale_order_ext_views.xml
+|
 ├── controllers/
 │   ├── __init__.py
 │   └── controllers.py
+|
 ├── security/
 │   └── ir.model.access.csv
+|
 └── demo/
     └── demo.xml
 ```
 
-## 2. Directory Structure Explained
+## Directory Structure Explained
 
 | File/Folder | Purpose |
 |-------------|---------|
 | `__init__.py` | Python package initializer. Imports models and controllers |
-| `__manifest__.py` | Module metadata: name, dependencies, data files to load |
+| `__manifest__.py` | Module metadata: name, dependencies, our custom made files to load |
 | `models/` | Contains Python classes that define/extend database models |
 | `models/__init__.py` | Imports all model files |
 | `models/sale_order_ext.py` | Extends sale.order model with new fields/methods |
 | `views/` | Contains XML files that define UI (forms, lists, menus) |
 | `views/sale_order_ext_views.xml` | Extends existing views to show new fields |
-| `controllers/` | HTTP controllers for web routes (optional) |
+| `controllers/` | HTTP controllers for web routes (optional) and API |
 | `security/` | Access rights and rules |
 | `security/ir.model.access.csv` | Defines who can read/write/create/delete records |
 | `demo/` | Demo data loaded when creating database with demo data |
 
-## 3. Update __init__.py
+## 2. Update __init__.py
 
 `custom_addons/sale_order_ext/__init__.py`
 ```python
 from . import models
 from . import controllers
+# should be already there if created with scaffold
 ```
 
-## 4. Create Model Extension
+## 3. Create Model Extension
 
-`custom_addons/sale_order_ext/models/__init__.py`
-```python
-from . import sale_order_ext
-```
+
 
 `custom_addons/sale_order_ext/models/sale_order_ext.py`
+
 ```python
 from odoo import models, fields
 
@@ -79,12 +87,13 @@ class SaleOrder(models.Model):
         ('pickup', 'Store Pickup'),
     ], string="Delivery Preference", default='standard')
 
-    # Add computed field
+    # Add a computed field
     total_with_shipping = fields.Float(
         string="Total with Shipping",
         compute='_compute_total_with_shipping'
     )
 
+    # Demo Method for the newly added computed field
     def _compute_total_with_shipping(self):
         for order in self:
             shipping = 10.0 if order.delivery_preference == 'express' else 5.0
@@ -95,14 +104,21 @@ class SaleOrder(models.Model):
 
 | Code | Description |
 |------|-------------|
-| `_inherit = 'sale.order'` | Tells Odoo to extend the existing sale.order model |
+| `_inherit = 'sale.order'` | Tells Odoo to extend the existing sale.order model. THIS IS VERY INPORTANT|
 | `custom_note = fields.Char(...)` | Adds a new text field to the database |
 | `string="Custom Note"` | Label shown in UI |
-| `help="..."` | Tooltip text |
+| `help="..."` | Tooltip text to show when user hovers over the field |
 | `fields.Selection([...])` | Dropdown field with predefined options |
 | `compute='_compute_total...'` | Field value is calculated by a method |
 
-## 5. Create View Extension
+### Finally Add the created model to ```model/__init__.py``` to let odoo know about the changes
+
+`custom_addons/sale_order_ext/models/__init__.py`
+```python
+from . import sale_order_ext
+```
+
+## 4. Create View Extension
 
 `custom_addons/sale_order_ext/views/sale_order_ext_views.xml`
 ```xml
@@ -154,8 +170,8 @@ class SaleOrder(models.Model):
 | `position="replace"` | Replace found element |
 | `expr="//field[@name='field_name']"` | XPath to find elements |
 
-## 6. Update __manifest__.py
-
+## 5. Update __manifest__.py
+### Very important. Updating this lets odoo know what this module is and how to use it
 `custom_addons/sale_order_ext/__manifest__.py`
 ```python
 {
@@ -167,9 +183,11 @@ class SaleOrder(models.Model):
     'version': '1.0',
     'depends': ['sale'],  # Must depend on the module being extended
     'data': [
-        'views/sale_order_ext_views.xml',
+        'views/sale_order_ext_views.xml', # must add the created the view here
     ],
+    # if set True, it will appear as an application in app list
     'application': False,  # Not a standalone app, just extends sale
+    
     'auto_install': False,
 }
 ```
@@ -186,24 +204,26 @@ class SaleOrder(models.Model):
 | `application` | True = standalone app with menu; False = just extends |
 | `auto_install` | True = auto-install when dependencies are met |
 
-## 7. Install/Update the Module
+## 6. Install/Update the Module
 
-### Method 1: Command Line
+### Method 1: Web UI (Developer mode must be active)
+0. ```python odoo-bin -c odoo.conf```
+1. Go to **Apps**
+2. Click **Update Apps List**
+3. Search for "Sale Order Extension"
+4. Click **Install** or **Upgrade**
+
+### Method 2: Command Line
 ```bash
-# Install new module
+ # Install new module
 python odoo-bin -c odoo.conf -d my_odoo_db -i sale_order_ext --stop-after-init
 
 # Update existing module
 python odoo-bin -c odoo.conf -d my_odoo_db -u sale_order_ext --stop-after-init
 ```
 
-### Method 2: Web UI
-1. Go to **Apps**
-2. Click **Update Apps List**
-3. Search for "Sale Order Extension"
-4. Click **Install** or **Upgrade**
 
-## 8. Verify
+## 7. Verify
 
 1. Go to **Sales** → **Orders**
 2. Open or create a Sale Order

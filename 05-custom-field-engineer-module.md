@@ -1,4 +1,4 @@
-# Custom Field Engineer Module
+# Custom Field Engineer Module (Example)
 
 ## File: `field_engineer/__manifest__.py`
 
